@@ -67,15 +67,16 @@ with colC:
 st.markdown("---")
 
 # Demographics
+
 with st.expander("Demographics"):
+    
+
     col1, col2 = st.columns(2)
     with col1:
         gender = st.selectbox("Gender", ["Male", "Female"])
-        ethnicity = st.selectbox("Ethnicity", ["Asian", "Black", "White", "Hispanic", "Other"])
-        education_level = st.selectbox("Education Level", ["No formal", "Highschool", "Graduate", "Postgraduate"])
-        income_level = st.selectbox("Income Level", ["Low", "Lower-Middle", "Middle", "Upper-Middle", "High"])
+        # ethnicity, education_level, income_level are hidden (defaults applied)
     with col2:
-        employment_status = st.selectbox("Employment Status", ["Unemployed", "Employed"])
+        # employment_status is hidden (default applied)
         smoking_status = st.selectbox("Smoking Status", ["Smoker", "Non-smoker"])
         alcohol_consumption_per_week = st.slider("Alcohol (units/week)", 0, 30, 0)
         waist_to_hip_ratio = st.number_input("Waist-to-Hip Ratio", 0.6, 1.5, 0.9)
@@ -114,15 +115,17 @@ with st.expander("Lifestyle Factors"):
         heart_rate = st.slider("Heart Rate (bpm)", 40, 150, 72)
 
 # ================================
-# AUTOFILL ENGINE (from output.py)
+# AUTOFILL ENGINE (from output.py) with defaults for removed/hid columns
 # ================================
 DEFAULTS = {
     "Age": 40,
     "gender": "Male",
-    "ethnicity": "Asian",
-    "education_level": "Graduate",
-    "income_level": "Middle",
-    "employment_status": "Employed",
+    # The following demographic columns are hidden in the UI but required by the model.
+    # We set sensible defaults here.
+    "ethnicity": "Asian",            # default used instead of showing UI control
+    "education_level": "Graduate",   # default used instead of showing UI control
+    "income_level": "Middle",        # default used instead of showing UI control
+    "employment_status": "Employed", # default used instead of showing UI control
     "smoking_status": "Non-smoker",
     "physical_activity_minutes_per_week": 150,
     "diet_score": 60,
@@ -152,7 +155,7 @@ def auto_fill(age, gender, ethnicity, bmi, systolic_bp, diastolic_bp):
     row.update({
         "Age": int(age),
         "gender": gender,
-        "ethnicity": ethnicity,
+        "ethnicity": ethnicity,   # kept for consistency (default or if expanded later)
         "bmi": float(bmi),
         "systolic_bp": int(systolic_bp),
         "diastolic_bp": int(diastolic_bp),
@@ -170,19 +173,21 @@ def auto_fill(age, gender, ethnicity, bmi, systolic_bp, diastolic_bp):
     row["glucose_postprandial"] = gp
     row["insulin_level"] = round(min(max(7 + (bmi - 22) * 0.2 + np.random.random(), 2), 50), 1)
     row["hba1c"] = round(min(max(5.0 + (bmi - 22) * 0.03 + np.random.random()*0.2, 4.0), 11.0), 2)
-    row["physical_activity_minutes_per_week"] = 150
-    row["diet_score"] = 60
-    row["sleep_hours_per_day"] = 7
-    row["screen_time_hours_per_day"] = 4
+    row["physical_activity_minutes_per_week"] = physical_activity_minutes_per_week if 'physical_activity_minutes_per_week' in globals() else 150
+    row["diet_score"] = diet_score if 'diet_score' in globals() else 60
+    row["sleep_hours_per_day"] = sleep_hours_per_day if 'sleep_hours_per_day' in globals() else 7
+    row["screen_time_hours_per_day"] = screen_time_hours_per_day if 'screen_time_hours_per_day' in globals() else 4
     row["heart_rate"] = int(min(max(70 + (bmi - 22) * 0.5 + np.random.randint(-5, 6), 40), 150))
-    row["alcohol_consumption_per_week"] = 0
-    row["family_history_diabetes"] = "No"
-    row["hypertension_history"] = "No"
-    row["cardiovascular_history"] = "No"
-    row["education_level"] = "Graduate"
-    row["income_level"] = "Middle"
-    row["employment_status"] = "Employed"
-    row["smoking_status"] = "Non-smoker"
+    row["alcohol_consumption_per_week"] = alcohol_consumption_per_week if 'alcohol_consumption_per_week' in globals() else 0
+    row["family_history_diabetes"] = family_history_diabetes if 'family_history_diabetes' in globals() else "No"
+    row["hypertension_history"] = hypertension_history if 'hypertension_history' in globals() else "No"
+    row["cardiovascular_history"] = cardiovascular_history if 'cardiovascular_history' in globals() else "No"
+    # Keep hidden demographics as defaults for model compatibility
+    row["education_level"] = DEFAULTS["education_level"]
+    row["income_level"] = DEFAULTS["income_level"]
+    row["employment_status"] = DEFAULTS["employment_status"]
+    row["ethnicity"] = DEFAULTS["ethnicity"]
+    row["smoking_status"] = smoking_status if 'smoking_status' in globals() else DEFAULTS["smoking_status"]
 
     return pd.DataFrame([row])
 
@@ -199,12 +204,42 @@ def risk_level_text(x):
 st.markdown("---")
 
 if st.button("Predict Health Risks"):
-    input_df = auto_fill(Age, gender, ethnicity, bmi, systolic_bp, diastolic_bp)
+    # build input DataFrame using auto_fill - hidden fields get defaults
+    input_df = auto_fill(Age, gender, DEFAULTS["ethnicity"], bmi, systolic_bp, diastolic_bp)
 
+    # ensure any UI-provided fields overwrite defaults (lifestyle & labs)
+    input_df["physical_activity_minutes_per_week"] = physical_activity_minutes_per_week
+    input_df["diet_score"] = diet_score
+    input_df["sleep_hours_per_day"] = sleep_hours_per_day
+    input_df["screen_time_hours_per_day"] = screen_time_hours_per_day
+    input_df["heart_rate"] = heart_rate
+    input_df["alcohol_consumption_per_week"] = alcohol_consumption_per_week
+    input_df["cholesterol_total"] = cholesterol_total
+    input_df["hdl_cholesterol"] = hdl_cholesterol
+    input_df["ldl_cholesterol"] = ldl_cholesterol
+    input_df["triglycerides"] = triglycerides
+    input_df["glucose_postprandial"] = glucose_postprandial
+    input_df["insulin_level"] = insulin_level
+    input_df["hba1c"] = hba1c
+    input_df["glucose_fasting"] = glucose_fasting
+
+    # map yes/no to 1/0 for history flags
     for c in ["family_history_diabetes", "hypertension_history", "cardiovascular_history"]:
         if c in input_df.columns:
             input_df[c] = input_df[c].map({"Yes": 1, "No": 0})
 
+    # ensure smoking_status present and in expected format
+    input_df["smoking_status"] = smoking_status if 'smoking_status' in globals() else DEFAULTS["smoking_status"]
+
+    # final safety: ensure all model-required columns exist; if not, add with defaults
+    model_expected_cols = pipe.feature_names_in_ if hasattr(pipe, "feature_names_in_") else None
+    if model_expected_cols is not None:
+        for col in model_expected_cols:
+            if col not in input_df.columns:
+                # add missing column with a safe default (0 or DEFAULTS entry if present)
+                input_df[col] = DEFAULTS.get(col, 0)
+
+    # predict
     preds = pipe.predict(input_df)
     preds = preds[0] if preds.ndim == 2 else np.ravel(preds)
 
