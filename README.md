@@ -33,11 +33,14 @@ The Streamlit application allows users to:
 ## Repository Structure
 
 ```bash
-.
-├── readme.md
-│             
-├── app.py                         # Streamlit app entry point
+gi
+HEALTH APP/
 │
-├── best_pipeline.joblib            # Trained lightgbm model for disease risk prediction
+├── app.py                     # Main application file (runs the model & API/UI logic)
+├── best_pipeline.joblib       # Saved ML model pipeline (trained + optimized)
+├── requirements.txt           # Python dependencies required to run the project
+├── README.md                  # Project documentation
 │
-├── requirements.txt               # Python dependencies for the project
+└── .devcontainer/
+    └── devcontainer.json      # VS Code Dev Container setup for reproducible environment
+
