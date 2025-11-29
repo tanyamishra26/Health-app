@@ -19,7 +19,7 @@ This application is a machine learning–powered health assessment tool that pre
 ## Live Demo
 
 **Deployed Application:**  
-[HealthApp – Streamlit App]("_")
+[HealthApp – Streamlit App]("https://healthriskpredictionapp.streamlit.app/")
 
 The Streamlit application allows users to:
 - Collects user information including demographics, lifestyle habits, vitals, and medical history.
@@ -33,7 +33,7 @@ The Streamlit application allows users to:
 ## Repository Structure
 
 ```bash
-gi
+
 HEALTH APP/
 │
 ├── app.py                     # Main application file (runs the model & API/UI logic)
