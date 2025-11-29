@@ -36,7 +36,6 @@ The Streamlit application allows users to:
 .
 ├── readme.md
 │             
-│
 ├── app.py                         # Streamlit app entry point
 │
 ├── best_pipeline.joblib            # Trained lightgbm model for disease risk prediction
