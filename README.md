@@ -19,7 +19,7 @@ This application is a machine learning–powered health assessment tool that pre
 ## Live Demo
 
 **Deployed Application:**  
-[EbbinghausMind – Streamlit App]("_")
+[HealthApp – Streamlit App]("_")
 
 The Streamlit application allows users to:
 - Collects user information including demographics, lifestyle habits, vitals, and medical history.
@@ -34,11 +34,11 @@ The Streamlit application allows users to:
 
 ```bash
 .
-├── .devcontainer
-│   └── devcontainer.json          # Configuration for containerized development
+├── readme.md
+│             
 │
 ├── app.py                         # Streamlit app entry point
 │
-├── model.pkl                      # Trained lightgbm model for memory retention prediction
+├── best_pipeline.joblib            # Trained lightgbm model for disease risk prediction
 │
 ├── requirements.txt               # Python dependencies for the project
